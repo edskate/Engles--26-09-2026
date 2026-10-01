@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next 03 - English Training</title>
+
+<style>
+    *{
+        box-sizing:border-box;
+    }
+
+    body{
+        background:#000;
+        color:white;
+        margin:30px;
+        font-family:Arial, sans-serif;
+        line-height:1.6;
+    }
+
+    h1{
+        color:#fff;
+        margin-bottom:8px;
+    }
+
+    h2{
+        color:#57a7ff;
+        text-shadow:2px 2px 8px #330066;
+        margin-top:28px;
+    }
+
+    .subtitle{
+        color:#bbb;
+        margin-bottom:20px;
+    }
+
+    .controls{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        padding:15px;
+        background:#111;
+        border:1px solid #333;
+        border-radius:12px;
+        margin-bottom:22px;
+        position:sticky;
+        top:10px;
+        z-index:10;
+    }
+
+    button{
+        background:#1d1d1d;
+        color:white;
+        border:1px solid #666;
+        border-radius:8px;
+        padding:9px 13px;
+        cursor:pointer;
+        font-size:15px;
+    }
+
+    button:hover{
+        background:#333;
+    }
+
+    select{
+        background:#111;
+        color:white;
+        border:1px solid #666;
+        border-radius:8px;
+        padding:8px;
+    }
+
+    .word-row{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+        padding:8px 0;
+        border-bottom:1px solid #1b1b1b;
+    }
+
+    .english{
+        color:chartreuse;
+        font-size:1.15em;
+        font-weight:bold;
+        min-width:145px;
+    }
+
+    .portuguese{
+        color:#ff5a5a;
+        font-weight:bold;
+        text-shadow:2px 2px 6px black;
+        min-width:150px;
+    }
+
+    .speak-btn{
+        background:#083d1d;
+        border-color:#1c8d47;
+    }
+
+    .repeat-btn{
+        background:#332a00;
+        border-color:#998000;
+    }
+
+    hr{
+        border:0;
+        border-top:1px solid #444;
+        margin:28px 0;
+    }
+
+    .summary{
+        background:#101010;
+        padding:15px;
+        border-radius:10px;
+        border-left:4px solid #57a7ff;
+        margin:10px 0;
+    }
+
+    .status{
+        color:#ffd84d;
+        font-weight:bold;
+        width:100%;
+    }
+
+    @media (max-width:600px){
+        body{
+            margin:15px;
+        }
+
+        .english,
+        .portuguese{
+            min-width:auto;
+        }
+    }
+
+    .custom-box{
+        margin-top:30px;
+        background:#0d0d0d;
+        border:1px solid #333;
+        border-radius:14px;
+        padding:18px;
+    }
+
+    .custom-box textarea{
+        width:100%;
+        min-height:90px;
+        resize:vertical;
+        background:#050505;
+        color:white;
+        border:1px solid #555;
+        border-radius:10px;
+        padding:12px;
+        font-size:16px;
+        margin-bottom:12px;
+    }
+
+    .custom-actions{
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        margin-bottom:18px;
+    }
+
+    .save-btn{
+        background:#0a3e55;
+        border-color:#147aa3;
+    }
+
+    .delete-btn{
+        background:#551111;
+        border-color:#aa3333;
+    }
+
+    .history-list{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+    }
+
+    .history-item{
+        background:#161616;
+        border:1px solid #333;
+        border-radius:10px;
+        padding:12px;
+    }
+
+    .history-text{
+        color:#d8ffd8;
+        font-size:1.05em;
+        margin-bottom:8px;
+        word-break:break-word;
+    }
+
+    .history-translation{
+        color:#ff7b7b;
+        font-size:1em;
+        margin-bottom:8px;
+    }
+
+    .history-date{
+        color:#999;
+        font-size:.85em;
+        margin-bottom:8px;
+    }
+
+    .empty-history{
+        color:#aaa;
+        font-style:italic;
+    }
+
+</style>
+</head>
+
+<body>
+
+<h1>English Training - Next 03</h1>
+<p class="subtitle">Clique em 🔊 Ouvir para escutar a pronúncia em inglês.</p>
+
+<div class="controls">
+    <button onclick="speakAll()">▶ Ouvir tudo</button>
+    <button onclick="stopSpeech()">⏹ Parar</button>
+
+    <label>
+        Velocidade:
+        <select id="rate">
+            <option value="0.6">0.6 - bem devagar</option>
+            <option value="0.75" selected>0.75 - treino</option>
+            <option value="0.9">0.9 - normal lento</option>
+            <option value="1">1.0 - normal</option>
+        </select>
+    </label>
+
+    <div id="status" class="status">Pronto para treinar.</div>
+</div>
+
+<section id="training">
+
+    <div class="word-row">
+        <span class="english">power</span>
+        <span class="portuguese">(poder)</span>
+        <button class="speak-btn" onclick="speakText('power')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('power', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">energy</span>
+        <span class="portuguese">(energia)</span>
+        <button class="speak-btn" onclick="speakText('energy')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('energy', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">strength</span>
+        <span class="portuguese">(força)</span>
+        <button class="speak-btn" onclick="speakText('strength')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('strength', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">moment</span>
+        <span class="portuguese">(momento)</span>
+        <button class="speak-btn" onclick="speakText('moment')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('moment', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">time</span>
+        <span class="portuguese">(tempo)</span>
+        <button class="speak-btn" onclick="speakText('time')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('time', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">space</span>
+        <span class="portuguese">(espaço)</span>
+        <button class="speak-btn" onclick="speakText('space')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('space', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">planet</span>
+        <span class="portuguese">(planeta)</span>
+        <button class="speak-btn" onclick="speakText('planet')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('planet', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">moon</span>
+        <span class="portuguese">(lua)</span>
+        <button class="speak-btn" onclick="speakText('moon')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('moon', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">comet</span>
+        <span class="portuguese">(cometa)</span>
+        <button class="speak-btn" onclick="speakText('comet')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('comet', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">asteroid</span>
+        <span class="portuguese">(asteroide)</span>
+        <button class="speak-btn" onclick="speakText('asteroid')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('asteroid', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">meteor</span>
+        <span class="portuguese">(meteoro)</span>
+        <button class="speak-btn" onclick="speakText('meteor')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('meteor', 5)">🔁 5x</button>
+    </div>
+
+    <hr>
+
+    <h2>Knowledge and Power</h2>
+
+    <div class="word-row">
+        <span class="english">Can you?</span>
+        <span class="portuguese">(Você pode?)</span>
+        <button class="speak-btn" onclick="speakText('Can you?')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('Can you?', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">force</span>
+        <span class="portuguese">(força)</span>
+        <button class="speak-btn" onclick="speakText('force')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('force', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">formation</span>
+        <span class="portuguese">(formação)</span>
+        <button class="speak-btn" onclick="speakText('formation')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('formation', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">information</span>
+        <span class="portuguese">(informação)</span>
+        <button class="speak-btn" onclick="speakText('information')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('information', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">knowledge</span>
+        <span class="portuguese">(conhecimento)</span>
+        <button class="speak-btn" onclick="speakText('knowledge')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('knowledge', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">wisdom</span>
+        <span class="portuguese">(sabedoria)</span>
+        <button class="speak-btn" onclick="speakText('wisdom')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('wisdom', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">understanding</span>
+        <span class="portuguese">(entendimento)</span>
+        <button class="speak-btn" onclick="speakText('understanding')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('understanding', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">belief</span>
+        <span class="portuguese">(crença)</span>
+        <button class="speak-btn" onclick="speakText('belief')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('belief', 5)">🔁 5x</button>
+    </div>
+
+    <div class="word-row">
+        <span class="english">faith</span>
+        <span class="portuguese">(fé)</span>
+        <button class="speak-btn" onclick="speakText('faith')">🔊 Ouvir</button>
+        <button class="repeat-btn" onclick="repeatText('faith', 5)">🔁 5x</button>
+    </div>
+
+    <hr>
+
+    <h2>Virtues</h2>
+
+    <div class="word-row"><span class="english">charity</span><span class="portuguese">(caridade)</span><button class="speak-btn" onclick="speakText('charity')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('charity', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">generosity</span><span class="portuguese">(generosidade)</span><button class="speak-btn" onclick="speakText('generosity')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('generosity', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">kindness</span><span class="portuguese">(bondade)</span><button class="speak-btn" onclick="speakText('kindness')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('kindness', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">compassion</span><span class="portuguese">(compaixão)</span><button class="speak-btn" onclick="speakText('compassion')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('compassion', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">empathy</span><span class="portuguese">(empatia)</span><button class="speak-btn" onclick="speakText('empathy')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('empathy', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">sympathy</span><span class="portuguese">(simpatia)</span><button class="speak-btn" onclick="speakText('sympathy')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('sympathy', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">love</span><span class="portuguese">(amor)</span><button class="speak-btn" onclick="speakText('love')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('love', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">friendship</span><span class="portuguese">(amizade)</span><button class="speak-btn" onclick="speakText('friendship')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('friendship', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">loyalty</span><span class="portuguese">(lealdade)</span><button class="speak-btn" onclick="speakText('loyalty')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('loyalty', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">honesty</span><span class="portuguese">(honestidade)</span><button class="speak-btn" onclick="speakText('honesty')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('honesty', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">integrity</span><span class="portuguese">(integridade)</span><button class="speak-btn" onclick="speakText('integrity')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('integrity', 5)">🔁 5x</button></div>
+
+    <hr>
+
+    <h2>Vices</h2>
+
+    <div class="word-row"><span class="english">greed</span><span class="portuguese">(ganância)</span><button class="speak-btn" onclick="speakText('greed')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('greed', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">envy</span><span class="portuguese">(inveja)</span><button class="speak-btn" onclick="speakText('envy')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('envy', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">wrath</span><span class="portuguese">(ira)</span><button class="speak-btn" onclick="speakText('wrath')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('wrath', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">pride</span><span class="portuguese">(orgulho)</span><button class="speak-btn" onclick="speakText('pride')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('pride', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">sloth</span><span class="portuguese">(preguiça)</span><button class="speak-btn" onclick="speakText('sloth')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('sloth', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">gluttony</span><span class="portuguese">(gula)</span><button class="speak-btn" onclick="speakText('gluttony')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('gluttony', 5)">🔁 5x</button></div>
+    <div class="word-row"><span class="english">lust</span><span class="portuguese">(luxúria)</span><button class="speak-btn" onclick="speakText('lust')">🔊 Ouvir</button><button class="repeat-btn" onclick="repeatText('lust', 5)">🔁 5x</button></div>
+
+    <hr>
+
+    <h2>Summary</h2>
+
+    <div class="summary">
+        <p id="summary1">The virtues and vices listed above represent the moral qualities and flaws that shape human character.</p>
+        <button class="speak-btn" onclick="speakText(document.getElementById('summary1').innerText)">🔊 Ouvir frase</button>
+        <button class="repeat-btn" onclick="repeatText(document.getElementById('summary1').innerText, 5)">🔁 5x</button>
+    </div>
+
+    <div class="summary">
+        <p id="summary2">Understanding and cultivating virtues while avoiding vices is essential for personal growth and ethical living.</p>
+        <button class="speak-btn" onclick="speakText(document.getElementById('summary2').innerText)">🔊 Ouvir frase</button>
+        <button class="repeat-btn" onclick="repeatText(document.getElementById('summary2').innerText, 5)">🔁 5x</button>
+    </div>
+
+</section>
+
+<hr>
+
+<section class="custom-box">
+    <h2>Português → Inglês</h2>
+    <p>Digite somente a frase em português. Ao salvar, o programa traduz automaticamente para inglês e guarda as duas versões no histórico.</p>
+
+    <textarea id="customPhrase" placeholder="Digite somente em português. Exemplo: Eu estudo inglês todos os dias."></textarea>
+
+    <div class="custom-actions">
+        <button class="speak-btn" onclick="listenCustomPhrase()">🔊 Ouvir frase</button>
+        <button class="repeat-btn" onclick="repeatCustomPhrase()">🔁 Repetir 5x</button>
+        <button class="save-btn" onclick="saveCustomPhrase()">💾 Traduzir e salvar</button>
+        <button onclick="clearCustomInput()">🧹 Limpar campo</button>
+    </div>
+
+    <h2>Histórico de frases salvas</h2>
+    <div id="phraseHistory" class="history-list"></div>
+</section>
+
+<script>
+const synth = window.speechSynthesis;
+let englishVoice = null;
+let stopRequested = false;
+
+function loadVoices(){
+    const voices = synth.getVoices();
+
+    englishVoice =
+        voices.find(v => v.lang === "en-US") ||
+        voices.find(v => v.lang.startsWith("en-US")) ||
+        voices.find(v => v.lang.startsWith("en-GB")) ||
+        voices.find(v => v.lang.startsWith("en")) ||
+        null;
+}
+
+loadVoices();
+
+if ("onvoiceschanged" in speechSynthesis){
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function getRate(){
+    return parseFloat(document.getElementById("rate").value);
+}
+
+function setStatus(message){
+    document.getElementById("status").textContent = message;
+}
+
+function createUtterance(text){
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = getRate();
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    if(englishVoice){
+        utterance.voice = englishVoice;
+    }
+
+    return utterance;
+}
+
+function speakText(text){
+    stopRequested = false;
+    synth.cancel();
+
+    const utterance = createUtterance(text);
+
+    utterance.onstart = () => {
+        setStatus("🔊 Ouvindo: " + text);
+    };
+
+    utterance.onend = () => {
+        setStatus("✅ Concluído: " + text);
+    };
+
+    utterance.onerror = () => {
+        setStatus("⚠ Não foi possível reproduzir a voz.");
+    };
+
+    synth.speak(utterance);
+}
+
+function repeatText(text, repetitions = 5){
+    stopRequested = false;
+    synth.cancel();
+
+    let count = 0;
+
+    function next(){
+        if(stopRequested || count >= repetitions){
+            if(!stopRequested){
+                setStatus("✅ Treino de 5 repetições concluído.");
+            }
+            return;
+        }
+
+        count++;
+        const utterance = createUtterance(text);
+
+        utterance.onstart = () => {
+            setStatus("🔁 Repetição " + count + " de " + repetitions + ": " + text);
+        };
+
+        utterance.onend = () => {
+            setTimeout(next, 450);
+        };
+
+        utterance.onerror = () => {
+            setStatus("⚠ Erro ao reproduzir a voz.");
+        };
+
+        synth.speak(utterance);
+    }
+
+    next();
+}
+
+function speakAll(){
+    stopRequested = false;
+    synth.cancel();
+
+    const items = [...document.querySelectorAll(".english")]
+        .map(el => el.textContent.trim());
+
+    items.push(document.getElementById("summary1").innerText);
+    items.push(document.getElementById("summary2").innerText);
+
+    let index = 0;
+
+    function next(){
+        if(stopRequested || index >= items.length){
+            if(!stopRequested){
+                setStatus("✅ Todo o conteúdo foi narrado.");
+            }
+            return;
+        }
+
+        const text = items[index];
+        index++;
+
+        const utterance = createUtterance(text);
+
+        utterance.onstart = () => {
+            setStatus("▶ " + index + " de " + items.length + ": " + text);
+        };
+
+        utterance.onend = () => {
+            setTimeout(next, 350);
+        };
+
+        utterance.onerror = () => {
+            setTimeout(next, 200);
+        };
+
+        synth.speak(utterance);
+    }
+
+    next();
+}
+
+function stopSpeech(){
+    stopRequested = true;
+    synth.cancel();
+    setStatus("⏹ Narração parada.");
+}
+
+
+function speakPortuguese(text){
+    if(!text) return;
+
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    utterance.rate = getRate();
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const voices = synth.getVoices();
+    const ptVoice =
+        voices.find(v => v.lang === "pt-BR") ||
+        voices.find(v => v.lang.startsWith("pt")) ||
+        null;
+
+    if(ptVoice){
+        utterance.voice = ptVoice;
+    }
+
+    utterance.onstart = () => {
+        setStatus("🇧🇷 Ouvindo tradução: " + text);
+    };
+
+    utterance.onend = () => {
+        setStatus("✅ Tradução concluída.");
+    };
+
+    synth.speak(utterance);
+}
+
+
+function repeatPortuguese(text, repetitions = 5){
+    stopRequested = false;
+    synth.cancel();
+
+    let count = 0;
+
+    function next(){
+        if(stopRequested || count >= repetitions){
+            if(!stopRequested){
+                setStatus("✅ Treino em português concluído.");
+            }
+            return;
+        }
+
+        count++;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "pt-BR";
+        utterance.rate = getRate();
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        const voices = synth.getVoices();
+        const ptVoice =
+            voices.find(v => v.lang === "pt-BR") ||
+            voices.find(v => v.lang.startsWith("pt")) ||
+            null;
+
+        if(ptVoice){
+            utterance.voice = ptVoice;
+        }
+
+        utterance.onstart = () => {
+            setStatus("🔁 Português " + count + " de " + repetitions + ": " + text);
+        };
+
+        utterance.onend = () => {
+            setTimeout(next, 450);
+        };
+
+        synth.speak(utterance);
+    }
+
+    next();
+}
+
+const PHRASE_HISTORY_KEY = "englishTrainingPhraseHistory";
+
+function getPhraseHistory(){
+    try{
+        return JSON.parse(localStorage.getItem(PHRASE_HISTORY_KEY)) || [];
+    }catch(error){
+        return [];
+    }
+}
+
+function setPhraseHistory(history){
+    localStorage.setItem(PHRASE_HISTORY_KEY, JSON.stringify(history));
+}
+
+function listenCustomPhrase(){
+    const text = document.getElementById("customPhrase").value.trim();
+
+    if(!text){
+        setStatus("⚠ Digite uma frase antes de ouvir.");
+        return;
+    }
+
+    speakPortuguese(text);
+}
+
+function repeatCustomPhrase(){
+    const text = document.getElementById("customPhrase").value.trim();
+
+    if(!text){
+        setStatus("⚠ Digite uma frase antes de repetir.");
+        return;
+    }
+
+    repeatPortuguese(text, 5);
+}
+
+async function translateToEnglish(text){
+    const url =
+        "https://api.mymemory.translated.net/get?q=" +
+        encodeURIComponent(text) +
+        "&langpair=pt-BR|en";
+
+    const response = await fetch(url);
+
+    if(!response.ok){
+        throw new Error("Falha na tradução");
+    }
+
+    const data = await response.json();
+
+    if(
+        data &&
+        data.responseData &&
+        data.responseData.translatedText
+    ){
+        return data.responseData.translatedText;
+    }
+
+    throw new Error("Tradução não encontrada");
+}
+
+async function saveCustomPhrase(){
+    const input = document.getElementById("customPhrase");
+    const text = input.value.trim();
+
+    if(!text){
+        setStatus("⚠ Digite uma frase em português antes de salvar.");
+        return;
+    }
+
+    setStatus("🌐 Traduzindo para inglês...");
+
+    try{
+        const translation = await translateToEnglish(text);
+
+        const history = getPhraseHistory();
+
+        history.unshift({
+            id: Date.now(),
+            text: translation,
+            translation: text,
+            savedAt: new Date().toLocaleString("pt-BR")
+        });
+
+        setPhraseHistory(history);
+        input.value = "";
+        renderPhraseHistory();
+
+        setStatus("✅ Frase salva em português e inglês.");
+    }catch(error){
+        setStatus("⚠ Não foi possível traduzir. Verifique sua internet e tente novamente.");
+    }
+}
+
+function deletePhrase(id){
+    const history = getPhraseHistory().filter(item => item.id !== id);
+    setPhraseHistory(history);
+    renderPhraseHistory();
+    setStatus("🗑 Frase apagada do histórico.");
+}
+
+function usePhraseAgain(id){
+    const item = getPhraseHistory().find(item => item.id === id);
+
+    if(!item) return;
+
+    document.getElementById("customPhrase").value = item.translation || "";
+    document.getElementById("customPhrase").focus();
+    setStatus("✍ Frase em português carregada novamente.");
+}
+
+function clearCustomInput(){
+    document.getElementById("customPhrase").value = "";
+    setStatus("🧹 Campo de frase limpo.");
+}
+
+function renderPhraseHistory(){
+    const container = document.getElementById("phraseHistory");
+    const history = getPhraseHistory();
+
+    container.innerHTML = "";
+
+    if(history.length === 0){
+        container.innerHTML = '<div class="empty-history">Nenhuma frase salva ainda.</div>';
+        return;
+    }
+
+    history.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "history-item";
+
+        const textDiv = document.createElement("div");
+        textDiv.className = "history-text";
+        textDiv.textContent = "Inglês: " + item.text;
+
+        const translationDiv = document.createElement("div");
+        translationDiv.className = "history-translation";
+        translationDiv.textContent = item.translation ? "Português: " + item.translation : "Português: não informado";
+
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "history-date";
+        dateDiv.textContent = "Salvo em: " + item.savedAt;
+
+        const actions = document.createElement("div");
+        actions.className = "custom-actions";
+
+        const listenBtn = document.createElement("button");
+        listenBtn.className = "speak-btn";
+        listenBtn.textContent = "🔊 Ouvir";
+        listenBtn.onclick = () => speakText(item.text);
+
+        const listenPtBtn = document.createElement("button");
+        listenPtBtn.textContent = "🇧🇷 Ouvir português";
+        listenPtBtn.onclick = () => speakPortuguese(item.translation || "");
+
+        const repeatBtn = document.createElement("button");
+        repeatBtn.className = "repeat-btn";
+        repeatBtn.textContent = "🔁 5x";
+        repeatBtn.onclick = () => repeatText(item.text, 5);
+
+        const reuseBtn = document.createElement("button");
+        reuseBtn.textContent = "✍ Usar novamente";
+        reuseBtn.onclick = () => usePhraseAgain(item.id);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "🗑 Apagar";
+        deleteBtn.onclick = () => deletePhrase(item.id);
+
+        actions.appendChild(listenBtn);
+        actions.appendChild(listenPtBtn);
+        actions.appendChild(repeatBtn);
+        actions.appendChild(reuseBtn);
+        actions.appendChild(deleteBtn);
+
+        card.appendChild(textDiv);
+        card.appendChild(translationDiv);
+        card.appendChild(dateDiv);
+        card.appendChild(actions);
+
+        container.appendChild(card);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", renderPhraseHistory);
+
+</script>
+
+</body>
+</html>
