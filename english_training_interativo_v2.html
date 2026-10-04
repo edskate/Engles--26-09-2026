@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Training Interativo</title>
+
+<style>
+:root{
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --text:#121212;
+    --red:#e11d2e;
+    --blue:#000040;
+    --green:#087f5b;
+    --orange:#d97706;
+    --border:#d8deea;
+}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+header{
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:#101735;
+    color:white;
+    padding:16px;
+    box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.header-wrap{
+    max-width:1100px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+}
+h1{margin:0;font-size:clamp(24px,5vw,38px)}
+#clock{
+    font-family:Consolas,monospace;
+    font-size:20px;
+    background:#05091b;
+    padding:10px 14px;
+    border-radius:10px;
+}
+main{
+    max-width:1100px;
+    margin:22px auto;
+    padding:0 15px 50px;
+}
+.panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 8px 25px rgba(20,28,60,.07);
+}
+.toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+button{
+    border:0;
+    border-radius:10px;
+    padding:11px 15px;
+    font-weight:bold;
+    cursor:pointer;
+    background:#172554;
+    color:white;
+}
+button:hover{filter:brightness(1.13)}
+button.secondary{background:#475569}
+button.good{background:var(--green)}
+button.warn{background:var(--orange)}
+button.danger{background:#b91c1c}
+input,textarea,select{
+    width:100%;
+    border:1px solid #bcc6d7;
+    border-radius:10px;
+    padding:11px;
+    font-size:16px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+@media(max-width:760px){
+    .grid{grid-template-columns:1fr}
+}
+.phrase{
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:15px;
+    margin:12px 0;
+    background:#fff;
+}
+.phrase p{
+    line-height:1.55;
+    color:var(--red);
+    text-shadow:1px 1px 2px #ddd;
+    text-align:left;
+    font-size:20px;
+    margin:6px 0;
+}
+.phrase i{
+    display:block;
+    color:var(--blue);
+    text-shadow:1px 1px 2px #ddd;
+    font-size:18px;
+    margin:8px 0 12px;
+}
+.score{
+    margin-top:9px;
+    font-weight:bold;
+    min-height:22px;
+}
+.chat{
+    height:310px;
+    overflow:auto;
+    background:#eef2ff;
+    border-radius:14px;
+    padding:12px;
+    border:1px solid #cbd5e1;
+}
+.msg{
+    max-width:82%;
+    padding:10px 12px;
+    margin:8px 0;
+    border-radius:12px;
+    line-height:1.4;
+}
+.user{
+    margin-left:auto;
+    background:#1d4ed8;
+    color:#fff;
+}
+.bot{
+    background:#fff;
+    border:1px solid #ccd4e0;
+}
+.chat-send{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    margin-top:10px;
+}
+.status{
+    padding:9px 12px;
+    border-radius:10px;
+    background:#e2e8f0;
+    margin-top:10px;
+}
+.progress{
+    height:14px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+.progress > div{
+    height:100%;
+    width:0%;
+    background:#16a34a;
+    transition:.3s;
+}
+small{color:#5b6474}
+.history-item{
+    padding:10px;
+    border-bottom:1px solid #e5e7eb;
+}
+@media print{
+    header,.no-print,#chatPanel,#addPanel{display:none!important}
+    body{background:white}
+    .panel,.phrase{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+<header>
+    <div class="header-wrap">
+        <div>
+            <h1>English Training</h1>
+            <div>Treino de voz, pronúncia e conversação</div>
+        </div>
+        <div id="clock">--:--:--</div>
+    </div>
+</header>
+
+<main>
+
+<section class="panel no-print" id="micHelp">
+    <h2>🎤 Permissão do microfone</h2>
+    <p id="micHelpText">
+        Para usar o microfone, o navegador precisa autorizar o acesso.
+    </p>
+    <div class="toolbar">
+        <button onclick="testMicrophone()">Testar / autorizar microfone</button>
+    </div>
+</section>
+
+<section class="panel no-print">
+    <div class="toolbar">
+        <button onclick="startSequence()">▶ Iniciar treino</button>
+        <button class="secondary" onclick="speakCurrent()">🔊 Ouvir atual</button>
+        <button class="good" onclick="practiceCurrent()">🎤 Falar atual</button>
+        <button class="warn" onclick="nextPhrase()">➡ Próxima</button>
+        <button class="secondary" onclick="window.print()">🖨 Salvar PDF</button>
+    </div>
+    <div class="status" id="globalStatus">Escolha uma frase ou clique em “Iniciar treino”.</div>
+    <p><strong>Progresso:</strong> <span id="progressText">0/0</span></p>
+    <div class="progress"><div id="progressBar"></div></div>
+</section>
+
+<section class="panel" id="phrasesPanel">
+    <h2>Frases para treino</h2>
+    <div id="phrases"></div>
+</section>
+
+<section class="panel" id="chatPanel">
+    <h2>Conversação de treino</h2>
+    <p>
+        Digite em inglês ou português. Este chat local responde com frases simples para praticar.
+        Para usar o ChatGPT real dentro da página é necessário conectar um servidor à API.
+    </p>
+
+    <div id="chat" class="chat"></div>
+
+    <div class="chat-send">
+        <input id="chatInput" type="text" placeholder="Digite aqui... Ex.: How was your day?">
+        <button onclick="sendChat()">Enviar</button>
+    </div>
+
+    <div class="toolbar" style="margin-top:10px">
+        <button class="good" onclick="voiceChat()">🎤 Falar</button>
+        <button class="secondary" onclick="speakLastBot()">🔊 Ouvir resposta</button>
+        <button class="danger" onclick="clearChat()">Apagar chat</button>
+    </div>
+</section>
+
+<section class="panel no-print" id="addPanel">
+    <h2>Adicionar nova frase</h2>
+    <div class="grid">
+        <div>
+            <label>Frase em inglês</label>
+            <input id="newEnglish" placeholder="Ex.: I need to study.">
+        </div>
+        <div>
+            <label>Pronúncia em português</label>
+            <input id="newPron" placeholder="Ex.: AI NÍD TÚ STÂDI">
+        </div>
+        <div>
+            <label>Tradução em português</label>
+            <input id="newTranslation" placeholder="Ex.: Eu preciso estudar.">
+        </div>
+    </div>
+    <br>
+    <button onclick="addPhrase()">＋ Adicionar frase</button>
+</section>
+
+<section class="panel">
+    <h2>Histórico</h2>
+    <div class="toolbar no-print">
+        <button class="danger" onclick="clearHistory()">Apagar histórico</button>
+    </div>
+    <div id="history"></div>
+</section>
+
+</main>
+
+<script>
+const DEFAULT_PHRASES = [
+["You want a cold one?","IÚ UÓNT A CÔULD UÃN?","Você quer uma bebida gelada?"],
+["Learn from my mistakes","LÂRN FROM MAI MISTÊIKS","Aprenda com meus erros"],
+["Before making new ones","BIFÓR MÊIKIN NIÚ UÃNS","Antes de cometer novos erros"],
+["Football and hockey.","FÚTBÓL ÉND RÓKI","Futebol e hóquei."],
+["Which do you prefer?","UÍTCH DU IÚ PRIFÂR?","Qual você prefere?"],
+["The one with the puck.","DÂ UÃN UÍD DÂ PÂK.","Aquele com o disco."],
+["The good ones always do","DÂ GÚD UÃNS ÓLUEIZ DÚ","Os bons sempre fazem isso"],
+["Have a good one","RÉV A GÚD UÃN","Tenha um bom dia"],
+["Have a nice day!","RÉV A NÁIS DÊI!","Tenha um ótimo dia!"],
+["Very expensive one","VÉRI IKSPÊNSIV UÃN","Um muito caro"],
+["A loved one","Â LÂVD UÃN","Uma pessoa amada"],
+["Which one?","UÍTCH UÃN?","Qual deles?"],
+["The blue one","DÂ BLÚ UÃN","O azul"],
+["If one is to understand the great mystery, one must understand all its aspects","IF UÃN IZ TÚ ÂNDERSTÉND DÂ GREIT MÍSTERI, UÃN MÂST ÂNDERSTÉND ÓL ITS ÁSPEKTS","Se alguém quiser entender o grande mistério, deve entender todos os seus aspectos"],
+["And one should always share wonderful news with one's very good friends","ÉND UÃN XUD ÓLUEIZ XÉR UÂNDERFOL NIÚZ UÍD UÃNS VÉRI GÚD FRÉNDS","E devemos sempre compartilhar notícias maravilhosas com nossos bons amigos"],
+["One does what one must","UÃN DÂZ UÓT UÃN MÂST","Fazemos o que devemos fazer"],
+["Today is a new day.","TUDÊI IZ A NIÚ DÊI","Hoje é um novo dia."],
+["I have to put food for my cat.","AI RÉV TÚ PUT FÚD FÓR MAI KÉT","Eu tenho que colocar comida para o meu gato."],
+["I need to study.","AI NÍD TÚ STÂDI","Eu preciso estudar."],
+["I just need synchronization.","AI DJÂST NÍD SÍNCRONIZÊIXON","Eu só preciso de sincronização."],
+["I just need you to follow what was agreed.","AI DJÂST NÍD IÚ TÚ FÓLOU UÓT UÓZ AGRÍD","Eu só preciso que você siga o que foi combinado."],
+["I just need a little peace.","AI DJÂST NÍD A LÍTOL PÍS","Eu só preciso de um pouco de paz."],
+["Respect my work and my space.","RISPÉKT MAI UÂRK ÉND MAI SPÊIS","Respeite meu trabalho e meu espaço."],
+["This is important.","DIS IZ IMPÓRTANT","Isso é importante."]
+];
+
+let phrases = JSON.parse(localStorage.getItem("englishTrainingPhrases") || "null") || DEFAULT_PHRASES;
+let completed = JSON.parse(localStorage.getItem("englishTrainingCompleted") || "[]");
+let currentIndex = 0;
+let lastBotText = "";
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function updateClock(){
+    const now = new Date();
+    document.getElementById("clock").textContent =
+        now.toLocaleDateString("pt-BR") + "  " +
+        now.toLocaleTimeString("pt-BR",{hour12:false});
+}
+setInterval(updateClock,1000); updateClock();
+
+function renderPhrases(){
+    const wrap = document.getElementById("phrases");
+    wrap.innerHTML = "";
+    phrases.forEach((item,index)=>{
+        const done = completed.includes(index);
+        const div = document.createElement("div");
+        div.className = "phrase";
+        div.id = "phrase-"+index;
+        div.innerHTML = `
+            <p>${escapeHtml(item[0])}</p>
+            <i>${escapeHtml(item[1])}</i>
+            <div id="translation-${index}" style="display:none;margin:10px 0;padding:10px;background:#fff7ed;border-left:4px solid #f59e0b;border-radius:8px;">
+                <strong>Tradução:</strong> ${escapeHtml(item[2] || "Tradução não adicionada")}
+            </div>
+            <div class="toolbar no-print">
+                <button onclick="selectPhrase(${index}); speakText('${escapeJS(item[0])}')">🔊 Ouvir</button>
+                <button class="good" onclick="selectPhrase(${index}); practicePhrase(${index})">🎤 Praticar</button>
+                <button class="secondary" onclick="markDone(${index})">${done ? "✓ Concluída" : "Marcar concluída"}</button>
+            </div>
+            <div class="score" id="score-${index}">${done ? "✅ Concluída" : ""}</div>
+        `;
+        wrap.appendChild(div);
+    });
+    updateProgress();
+}
+
+function selectPhrase(index){
+    currentIndex=index;
+    document.querySelectorAll(".phrase").forEach(x=>x.style.outline="none");
+    const el=document.getElementById("phrase-"+index);
+    if(el){
+        el.style.outline="3px solid #2563eb";
+        el.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+    document.getElementById("globalStatus").textContent =
+        "Frase atual: " + phrases[index][0];
+}
+
+function startSequence(){
+    currentIndex=0;
+    selectPhrase(currentIndex);
+    speakCurrent();
+}
+
+function nextPhrase(){
+    if(!phrases.length)return;
+    currentIndex=(currentIndex+1)%phrases.length;
+    selectPhrase(currentIndex);
+    speakCurrent();
+}
+
+function speakText(text){
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="en-US";
+    u.rate=0.85;
+    u.pitch=1;
+    speechSynthesis.speak(u);
+}
+
+function speakCurrent(){
+    if(phrases[currentIndex]) speakText(phrases[currentIndex][0]);
+}
+
+function practiceCurrent(){
+    practicePhrase(currentIndex);
+}
+
+function practicePhrase(index){
+    if(!SpeechRecognition){
+        alert("Seu navegador não disponibilizou reconhecimento de voz. Tente Chrome ou Edge e permita o microfone.");
+        return;
+    }
+
+    selectPhrase(index);
+    const recognition = new SpeechRecognition();
+    recognition.lang="en-US";
+    recognition.interimResults=false;
+    recognition.maxAlternatives=3;
+
+    const scoreBox=document.getElementById("score-"+index);
+    scoreBox.textContent="🎤 Ouvindo... fale agora.";
+    document.getElementById("globalStatus").textContent="🎤 Ouvindo sua pronúncia...";
+
+    recognition.onresult=(event)=>{
+        const heard=event.results[0][0].transcript;
+        const target=phrases[index][0];
+        const transBox = document.getElementById("translation-"+index);
+        if(transBox) transBox.style.display = "block";
+        const score=similarity(normalize(target),normalize(heard));
+        const percent=Math.round(score*100);
+
+        let message="";
+        if(percent>=85){
+            message=`✅ Muito bom: ${percent}% — ouvi: "${heard}"`;
+            markDone(index,false);
+        }else if(percent>=65){
+            message=`🟡 Quase: ${percent}% — ouvi: "${heard}". Tente novamente.`;
+        }else{
+            message=`🔴 Vamos repetir: ${percent}% — ouvi: "${heard}".`;
+        }
+
+        scoreBox.textContent=message;
+        document.getElementById("globalStatus").textContent=message;
+        saveHistory(target,heard,percent);
+
+        if(percent>=85){
+            setTimeout(()=>{
+                currentIndex=(index+1)%phrases.length;
+                selectPhrase(currentIndex);
+                speakCurrent();
+            },1100);
+        }
+    };
+
+    recognition.onerror=(event)=>{
+        const transBox = document.getElementById("translation-"+index);
+        if(transBox) transBox.style.display = "block";
+
+        let msg = "Não consegui captar sua voz.";
+        if(event.error === "not-allowed" || event.error === "service-not-allowed"){
+            msg = "🚫 Microfone bloqueado. Clique no cadeado ao lado do endereço do site, permita Microfone e recarregue a página. Se abriu como arquivo do computador (file://), use localhost ou um site HTTPS.";
+        } else if(event.error === "no-speech"){
+            msg = "🎤 Não ouvi sua voz. Clique novamente e fale mais perto do microfone.";
+        } else if(event.error === "audio-capture"){
+            msg = "🎤 Nenhum microfone foi encontrado ou está sendo usado por outro programa.";
+        }
+        scoreBox.textContent = msg;
+        document.getElementById("globalStatus").textContent = msg;
+    };
+
+    try{
+        recognition.start();
+    }catch(err){
+        scoreBox.textContent="Não foi possível iniciar o microfone.";
+    }
+}
+
+function normalize(str){
+    return str.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+        .replace(/[^a-z0-9' ]/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+}
+
+function similarity(a,b){
+    if(a===b)return 1;
+    if(!a.length||!b.length)return 0;
+
+    const aWords=new Set(a.split(" "));
+    const bWords=new Set(b.split(" "));
+    let common=0;
+    aWords.forEach(w=>{if(bWords.has(w))common++});
+    const wordScore=common/Math.max(aWords.size,bWords.size);
+
+    const distance=levenshtein(a,b);
+    const charScore=1-distance/Math.max(a.length,b.length);
+
+    return Math.max(0,(wordScore*.55)+(charScore*.45));
+}
+
+function levenshtein(a,b){
+    const m=a.length,n=b.length;
+    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++)dp[i][0]=i;
+    for(let j=0;j<=n;j++)dp[0][j]=j;
+    for(let i=1;i<=m;i++){
+        for(let j=1;j<=n;j++){
+            dp[i][j]=Math.min(
+                dp[i-1][j]+1,
+                dp[i][j-1]+1,
+                dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)
+            );
+        }
+    }
+    return dp[m][n];
+}
+
+function markDone(index,rerender=true){
+    if(!completed.includes(index))completed.push(index);
+    localStorage.setItem("englishTrainingCompleted",JSON.stringify(completed));
+    updateProgress();
+    if(rerender)renderPhrases();
+}
+
+function updateProgress(){
+    const total=phrases.length;
+    const valid=completed.filter(i=>i<total);
+    completed=[...new Set(valid)];
+    const count=completed.length;
+    document.getElementById("progressText").textContent=`${count}/${total}`;
+    document.getElementById("progressBar").style.width=
+        (total ? (count/total)*100 : 0)+"%";
+}
+
+function addPhrase(){
+    const en=document.getElementById("newEnglish").value.trim();
+    const pr=document.getElementById("newPron").value.trim();
+    const tr=document.getElementById("newTranslation").value.trim();
+    if(!en)return alert("Digite a frase em inglês.");
+    phrases.push([en,pr || "Pronúncia ainda não adicionada", tr || "Tradução não adicionada"]);
+    localStorage.setItem("englishTrainingPhrases",JSON.stringify(phrases));
+    document.getElementById("newEnglish").value="";
+    document.getElementById("newPron").value="";
+    document.getElementById("newTranslation").value="";
+    renderPhrases();
+}
+
+function saveHistory(target,heard,score){
+    const hist=JSON.parse(localStorage.getItem("englishTrainingHistory")||"[]");
+    hist.unshift({
+        date:new Date().toLocaleString("pt-BR"),
+        target,heard,score
+    });
+    localStorage.setItem("englishTrainingHistory",JSON.stringify(hist.slice(0,100)));
+    renderHistory();
+}
+
+function renderHistory(){
+    const hist=JSON.parse(localStorage.getItem("englishTrainingHistory")||"[]");
+    const el=document.getElementById("history");
+    if(!hist.length){
+        el.innerHTML="<p><small>Nenhum treino registrado ainda.</small></p>";
+        return;
+    }
+    el.innerHTML=hist.map(h=>`
+        <div class="history-item">
+            <strong>${escapeHtml(h.date)}</strong> — ${h.score}%<br>
+            Alvo: ${escapeHtml(h.target)}<br>
+            Ouvido: ${escapeHtml(h.heard)}
+        </div>
+    `).join("");
+}
+
+function clearHistory(){
+    localStorage.removeItem("englishTrainingHistory");
+    renderHistory();
+}
+
+function botReply(raw){
+    const text=normalize(raw);
+
+    if(/^(hi|hello|hey|ola|oi)\b/.test(text))
+        return "Hello! How are you today?";
+
+    if(text.includes("how are you"))
+        return "I'm doing well. How are you?";
+
+    if(text.includes("how was your day") || text.includes("como foi seu dia"))
+        return "My day was good. How was your day?";
+
+    if(text.includes("work today") || text.includes("trabalhar hoje"))
+        return "Are you going to work today?";
+
+    if(text.includes("speak english") || text.includes("fala ingles"))
+        return "Yes. Let's practice English together.";
+
+    if(text.includes("favorite sport") || text.includes("esporte preferido"))
+        return "What is your favorite sport?";
+
+    if(text.includes("study") || text.includes("estudar"))
+        return "Good. You can say: I study English every day.";
+
+    if(text.includes("cat") || text.includes("gato"))
+        return "You can say: I have to put food out for my cat.";
+
+    if(text.includes("pronunciation") || text.includes("pronuncia"))
+        return "Choose a phrase above, listen to it, and then use the microphone to practice.";
+
+    return "Good. Tell me more in English. You can also ask me: How was your day?";
+}
+
+function addChatMessage(text,type){
+    const div=document.createElement("div");
+    div.className="msg "+type;
+    div.textContent=text;
+    const chat=document.getElementById("chat");
+    chat.appendChild(div);
+    chat.scrollTop=chat.scrollHeight;
+}
+
+function sendChat(){
+    const input=document.getElementById("chatInput");
+    const text=input.value.trim();
+    if(!text)return;
+    addChatMessage(text,"user");
+    input.value="";
+
+    const reply=botReply(text);
+    lastBotText=reply;
+    setTimeout(()=>{
+        addChatMessage(reply,"bot");
+        speakText(reply);
+    },250);
+}
+
+function voiceChat(){
+    if(!SpeechRecognition){
+        alert("Reconhecimento de voz indisponível neste navegador.");
+        return;
+    }
+    const recognition=new SpeechRecognition();
+    recognition.lang="en-US";
+    recognition.interimResults=false;
+    document.getElementById("globalStatus").textContent="🎤 Fale sua mensagem...";
+    recognition.onresult=(event)=>{
+        document.getElementById("chatInput").value=event.results[0][0].transcript;
+        sendChat();
+    };
+    recognition.onerror=()=> {
+        document.getElementById("globalStatus").textContent="Não consegui ouvir sua mensagem.";
+    };
+    recognition.start();
+}
+
+function speakLastBot(){
+    if(lastBotText)speakText(lastBotText);
+}
+
+function clearChat(){
+    document.getElementById("chat").innerHTML="";
+    addChatMessage("Hello! Choose a phrase above or talk to me in English.","bot");
+}
+
+function escapeHtml(text){
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+}
+function escapeJS(text){
+    return String(text)
+        .replaceAll("\\","\\\\")
+        .replaceAll("'","\\'");
+}
+
+document.getElementById("chatInput").addEventListener("keydown",e=>{
+    if(e.key==="Enter")sendChat();
+});
+
+
+async function testMicrophone(){
+    const box = document.getElementById("micHelpText");
+
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        box.innerHTML = "🚫 Este navegador ou este modo de abertura não permite solicitar o microfone. Abra no Chrome/Edge usando <strong>https://</strong> ou <strong>localhost</strong>.";
+        return;
+    }
+
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        stream.getTracks().forEach(track=>track.stop());
+        box.innerHTML = "✅ Microfone autorizado. Agora você pode clicar em <strong>Praticar</strong> ou <strong>Falar atual</strong>.";
+    }catch(err){
+        box.innerHTML = "🚫 O microfone continua bloqueado. Clique no cadeado ao lado do endereço do navegador → Permissões do site → Microfone → Permitir. Depois recarregue a página.";
+    }
+}
+
+if(location.protocol === "file:"){
+    const box = document.getElementById("micHelpText");
+    if(box){
+        box.innerHTML = "⚠️ Você abriu este programa diretamente do computador (<strong>file://</strong>). O Chrome/Edge pode bloquear o microfone nesse modo. Para funcionar de forma confiável, abra por <strong>localhost</strong> ou por um endereço <strong>HTTPS</strong>.";
+    }
+}
+
+renderPhrases();
+renderHistory();
+clearChat();
+</script>
+<hr>
+<a href="index05.html">Previous Page</a>
+</body>
+</html>
